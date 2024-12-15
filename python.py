@@ -6,7 +6,7 @@ DELTA = 1e-7
 MIN_SEPARATION = 1 # minimum separation the particles in the initial random distribution
 
 n = 7 # no of particles
-TRIALS = 10 # no of runs
+TRIALS = 50 # no of runs
 
 class SystemBase:
     def __init__(self, n):
@@ -14,9 +14,10 @@ class SystemBase:
         self.dE = np.zeros([self.n,3])
 
     def generate_random_particles(self, n):
+        '''Generate n particles randomly such that
+        the particles are placed with a distance of more than the MIN_SEPARATION'''
         self.n = n
         particle_list = []
-        retry = True
         for i in range(n):
             while True:
                 fail = False
