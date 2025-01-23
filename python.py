@@ -5,8 +5,8 @@ RELATIVE_TOLERANCE = 1e-12 # for comparing if equilibrium energyhas been reached
 DELTA = 1e-7
 MIN_SEPARATION = 1 # minimum separation the particles in the initial random distribution
 
-n = 7 # no of particles
-TRIALS = 50 # no of runs
+np.seterr(divide='ignore')
+np.seterr(invalid='warn')
 
 class SystemBase:
     def __init__(self, n):
@@ -96,19 +96,60 @@ class Morse(SystemBase):
     def potential(self, r):
         return (1-np.exp(-(r-self.r_e)))**2
 
+print("Select the potential to be used for the determination of the equilibrium geometry")
+print('''1. Lennard-Jones
+2. Morse r_e/σ = 1
+3. Morse r_e/σ = 3
+
+Type the selection number of the potential:''')
+input_success = False
+while not input_success:
+    num_selection = input()
+    if not num_selection.isdigit():
+        print("Please enter a valid number!")
+    elif 0 < int(num_selection) <= 3:
+        num_selection = int(num_selection)
+        input_success = True
+    else:
+        print("Please enter a valid number!")
+
+print("Type the number of runs to complete")
+input_success = False
+while not input_success:
+    trials = input()
+    if not trials.isdigit():
+        print("Please enter a valid number!")
+    else:
+        trials = int(trials)
+        input_success = True
+
+print("Type the number of atoms in the system")
+input_success = False
+while not input_success:
+    n = input()
+    if not n.isdigit():
+        print("Please enter a valid number!")
+    else:
+        n = int(n)
+        input_success = True
 
 
 step_count = 0 # step count
 best_state = None
-for i in range(TRIALS):
-    state = LennardJones(n)
-    # state = Morse(n, 1)
-    # state = Morse(n, 3)
+for i in range(trials):
+    match num_selection: # determine the potential used
+        case 1:
+            state = LennardJones(n)
+        case 2:
+            state = Morse(n, 1)
+        case 3:
+            state = Morse(n, 3)
+
     while True:
         state.step()
         if step_count%1000 == 0:
-            if step_count >= 2000:
-                if np.allclose(-prev_E, -state.total_E, atol=0, rtol=RELATIVE_TOLERANCE):
+            if step_count >= 2000: # compare energies every 1000 steps
+                if np.allclose(prev_E, state.total_E, atol=0, rtol=RELATIVE_TOLERANCE):
                     print("convergence reached")
                     state.xyz_output()
                     print(f'Run {i+1} Energy: {state.total_E}')
@@ -122,7 +163,8 @@ for i in range(TRIALS):
             # print(state.total_E)
             prev_E = state.total_E.copy()
         step_count += 1
-        if np.sum(state.r) > 1000000000:
+
+        if np.sum(state.r) > 1000000000: # stops the calculation if distances become too large and diverges
             print("values diverged")
             break
 
