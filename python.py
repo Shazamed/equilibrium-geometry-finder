@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 RELATIVE_TOLERANCE = 1e-12 # for comparing if equilibrium energy has been reached
 DELTA = 1e-7
