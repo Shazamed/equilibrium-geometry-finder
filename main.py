@@ -50,6 +50,7 @@ class SystemBase:
         '''
         self.r = self.calc_r(self.particles)
         self.E = self.potential(self.r)
+        print(self.E)
         self.total_E = np.nansum(self.E)/2 # divide by 2 as the sum of the energies of all particles is twice the total energy
     
     def potential(self): # to be overridden
